@@ -83,6 +83,7 @@ export interface FigletOptions {
   printDirection?: PrintDirection;
   showHardBlanks?: boolean;
   fallbackFont?: FontName;
+  slant?: boolean;
 }
 
 export interface FigletDefaults {
@@ -125,6 +126,7 @@ export interface InternalOptions extends FontMetadata {
   width: number;
   whitespaceBreak: boolean;
   showHardBlanks: boolean;
+  slant: boolean;
   fallbackFont?: FontName;
 }
 

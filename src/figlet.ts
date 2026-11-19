@@ -758,6 +758,20 @@ const figlet: FigletModule = (() => {
   }
 
   /**
+   * Slants ASCII Art to the right, leaning vertical bars with it
+   *
+   * @param lines Lines of the ASCII Art
+   */
+  function slantFigLines(lines: string[]): string[] {
+    return lines.map(
+      (line, row) =>
+        " ".repeat(lines.length - 1 - row) +
+        line.replace(/\|/g, "/") +
+        " ".repeat(row),
+    );
+  }
+
+  /**
    * Return max line of the ASCII Art
    *
    * @param textLines Lines for the text
@@ -1194,6 +1208,9 @@ const figlet: FigletModule = (() => {
         generateFigTextLines(lines[ii], figFonts[actualFontName], options),
       );
     }
+    if (options.slant) {
+      figLines = figLines.map(slantFigLines);
+    }
     len = figLines.length;
     output = figLines[0];
     for (ii = 1; ii < len; ii++) {
@@ -1222,6 +1239,7 @@ const figlet: FigletModule = (() => {
     myOpts.showHardBlanks = options.showHardBlanks || false;
     myOpts.width = options.width || -1;
     myOpts.whitespaceBreak = options.whitespaceBreak || false;
+    myOpts.slant = options.slant || false;
 
     if (options.fallbackFont) {
       const fallbackMeta = figFonts[getFontName(options.fallbackFont)].options;
@@ -1255,6 +1273,19 @@ const figlet: FigletModule = (() => {
       const params = getVerticalFittingRules(options.verticalLayout, fontMeta);
       if (params) {
         Object.assign(myOpts.fittingRules, params);
+      }
+    }
+
+    if (myOpts.slant) {
+      Object.assign(
+        myOpts.fittingRules,
+        getVerticalFittingRules("full", fontMeta),
+      );
+      if (myOpts.width > 0) {
+        myOpts.width = Math.max(
+          1,
+          myOpts.width - (myOpts.height as number) + 1,
+        );
       }
     }
 

@@ -44,6 +44,7 @@ declare interface FigletOptions {
   printDirection?: PrintDirection;
   showHardBlanks?: boolean;
   fallbackFont?: FontName;
+  slant?: boolean;
 }
 
 declare interface FittingRules {
