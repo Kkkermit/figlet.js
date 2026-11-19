@@ -201,6 +201,13 @@ Default value: `false`
 
 This option works in conjunction with "width". If this option is set to true, then the library will attempt to break text up on whitespace when limiting the width. [Example](https://github.com/patorjk/figlet.js/blob/master/examples/front-end/index.htm)
 
+#### fallbackFont
+
+Type: `String`
+Default value: `undefined`
+
+The name of a second font to use for any character the main font doesn't have or leaves blank. It's loaded the same way as "font" (in the browser, preload it before using textSync). The two fonts are lined up on their baselines. If the fallback font reaches higher above or lower below the baseline than the main font, every line of output gets extra blank rows, even when no character falls back.
+
 ### Understanding Kerning
 
 The 2 layout options allow you to override a font's default "kerning". Below you can see how this effects the text. The string "Kerning" was printed using the "Standard" font with horizontal layouts of "default", "fitted" and then "full".
