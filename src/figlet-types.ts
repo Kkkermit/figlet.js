@@ -26,11 +26,7 @@ export type FontName =
   | CustomFont;
 
 export type KerningMethods =
-  | "default"
-  | "full"
-  | "fitted"
-  | "controlled smushing"
-  | "universal smushing";
+  "default" | "full" | "fitted" | "controlled smushing" | "universal smushing";
 
 export type PrintDirection = -1 | 0 | 1;
 
@@ -86,6 +82,7 @@ export interface FigletOptions {
   whitespaceBreak?: boolean;
   printDirection?: PrintDirection;
   showHardBlanks?: boolean;
+  fallbackFont?: FontName;
 }
 
 export interface FigletDefaults {
@@ -128,6 +125,7 @@ export interface InternalOptions extends FontMetadata {
   width: number;
   whitespaceBreak: boolean;
   showHardBlanks: boolean;
+  fallbackFont?: FontName;
 }
 
 export interface FigCharWithOverlap {
@@ -164,18 +162,14 @@ export interface FigletModule {
   text: (
     text: string,
     optionsOrFontOrCallback?:
-      | FigletOptions
-      | FontName
-      | CallbackFunction<string>,
+      FigletOptions | FontName | CallbackFunction<string>,
     callback?: CallbackFunction<string>,
   ) => Promise<string>;
 
   (
     text: string,
     optionsOrFontOrCallback?:
-      | FigletOptions
-      | FontName
-      | CallbackFunction<string>,
+      FigletOptions | FontName | CallbackFunction<string>,
     callback?: CallbackFunction<string>,
   ): Promise<string>;
 

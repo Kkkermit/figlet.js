@@ -767,6 +767,63 @@ const figlet: FigletModule = (() => {
   };
 
   /**
+   * Pads a character to the baseline and height shared with the fallback font, and gives it the
+   * main font's hardblank. A drawn copy of that hardblank character becomes "\0" so it isn't
+   * removed with the hardblanks, and generateText turns it back.
+   *
+   * @param figChar Lines of the character
+   * @param font Font the character comes from
+   * @param opts
+   */
+  function alignFigChar(
+    figChar: string[],
+    font: FigletFont,
+    opts: InternalOptions,
+  ): string[] {
+    const fontOpts = font.options;
+    const top = (opts.baseline as number) - (fontOpts.baseline as number);
+    const bottom = (opts.height as number) - (fontOpts.height as number) - top;
+    const width = figLinesWidth(figChar);
+    const hardBlanks = new RegExp(
+      `${escapeRegExpChar(fontOpts.hardBlank as string)}|${escapeRegExpChar(opts.hardBlank as string)}`,
+      "g",
+    );
+    return [
+      ...padLines(newFigChar(top), width),
+      ...figChar.map((line) =>
+        line.replace(hardBlanks, (ch) =>
+          ch === fontOpts.hardBlank ? (opts.hardBlank as string) : "\0",
+        ),
+      ),
+      ...padLines(newFigChar(bottom), width),
+    ];
+  }
+
+  /**
+   * Returns the character for a code point, from the fallback font if it is missing or blank
+   *
+   * @param codePoint
+   * @param font
+   * @param opts
+   */
+  function getFigChar(
+    codePoint: number,
+    font: FigletFont,
+    opts: InternalOptions,
+  ): string[] {
+    if (!opts.fallbackFont) {
+      return font[codePoint] ?? font[0];
+    }
+    const fallbackFont = figFonts[getFontName(opts.fallbackFont)];
+    const isMissing = !font[codePoint] || figLinesWidth(font[codePoint]) === 0;
+    if (isMissing && codePoint !== 0 && fallbackFont[codePoint]) {
+      font = fallbackFont;
+    }
+    const figChar = font[codePoint] ?? font[0];
+    return figChar && alignFigChar(figChar, font, opts);
+  }
+
+  /**
    * Join words or single characters into a single Fig line
    *
    * @param array Array of ASCII words or single character: {fig: array, overlap: number}
@@ -860,7 +917,7 @@ const figlet: FigletModule = (() => {
       isSpace = char.match(/\s/);
       // FIGcharacter 0 is the "missing character", the spec's fallback for
       // characters the font doesn't define
-      figChar = figChars[char.codePointAt(0) as number] ?? figChars[0];
+      figChar = getFigChar(char.codePointAt(0) as number, figChars, opts);
       textFigLine = null;
       if (figChar) {
         if (fittingRules.hLayout !== FULL_WIDTH) {
@@ -1143,7 +1200,9 @@ const figlet: FigletModule = (() => {
       output = smushVerticalFigLines(output, figLines[ii], options);
     }
 
-    return output ? output.join("\n") : "";
+    return output
+      ? output.join("\n").replace(/\0/g, options.hardBlank as string)
+      : "";
   };
 
   /*
@@ -1163,6 +1222,20 @@ const figlet: FigletModule = (() => {
     myOpts.showHardBlanks = options.showHardBlanks || false;
     myOpts.width = options.width || -1;
     myOpts.whitespaceBreak = options.whitespaceBreak || false;
+
+    if (options.fallbackFont) {
+      const fallbackMeta = figFonts[getFontName(options.fallbackFont)].options;
+      const below = Math.max(
+        (fontMeta.height as number) - (fontMeta.baseline as number),
+        (fallbackMeta.height as number) - (fallbackMeta.baseline as number),
+      );
+      myOpts.fallbackFont = options.fallbackFont;
+      myOpts.baseline = Math.max(
+        fontMeta.baseline as number,
+        fallbackMeta.baseline as number,
+      );
+      myOpts.height = myOpts.baseline + below;
+    }
 
     /*
      If the user is choosing to use a specific type of layout (e.g., 'full', 'fitted', etc etc)
@@ -1238,6 +1311,9 @@ const figlet: FigletModule = (() => {
 
     try {
       const fontOpts = await me.loadFont(fontName);
+      if (options.fallbackFont) {
+        await me.loadFont(options.fallbackFont);
+      }
       const generatedTxt = fontOpts
         ? generateText(fontName, _reworkFontOpts(fontOpts, options), txt)
         : "";
@@ -1276,6 +1352,9 @@ const figlet: FigletModule = (() => {
     }
 
     const fontName = options.font || figDefaults.font;
+    if (options.fallbackFont) {
+      me.loadFontSync(options.fallbackFont);
+    }
     let fontOpts = _reworkFontOpts(me.loadFontSync(fontName), options);
 
     return generateText(fontName, fontOpts, txt);
