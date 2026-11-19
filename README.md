@@ -208,6 +208,22 @@ Default value: `undefined`
 
 The name of a second font to use for any character the main font doesn't have or leaves blank. It's loaded the same way as "font" (in the browser, preload it before using textSync). The two fonts are lined up on their baselines. If the fallback font reaches higher above or lower below the baseline than the main font, every line of output gets extra blank rows, even when no character falls back.
 
+#### slant
+
+Type: `Boolean`
+Default value: `false`
+
+Slants the output to the right, like italic text. Every row is shifted and `|` is redrawn as `/`, but other characters keep their shape, so it works best with block fonts such as "ANSI Shadow" and "Banner". Slanted lines are stacked without vertical smushing, so "verticalLayout" is ignored. When "width" is set, the slant counts towards it.
+
+```
+      ██╗  ██╗██╗
+     ██║  ██║██║
+    ███████║██║
+   ██╔══██║██║
+  ██║  ██║██║
+ ╚═╝  ╚═╝╚═╝
+```
+
 ### Understanding Kerning
 
 The 2 layout options allow you to override a font's default "kerning". Below you can see how this effects the text. The string "Kerning" was printed using the "Standard" font with horizontal layouts of "default", "fitted" and then "full".
