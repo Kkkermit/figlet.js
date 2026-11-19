@@ -5,6 +5,7 @@ import path from 'path';
 import figlet from '../src/figlet'; // Import from src instead of lib
 import fontData from '../importable-fonts/Standard'
 import miniwi from '../importable-fonts/miniwi'
+import big from '../importable-fonts/Big'
 
 describe('figlet', () => {
   let fetchSpy: MockInstance<{
@@ -466,6 +467,26 @@ describe('figlet', () => {
         font: 'CodePointTestNoFallback',
       });
       expect(trimmed(output)).toEqual(['A  B', 'A  B', 'A  B']);
+    });
+  });
+
+  describe('fallback font', () => {
+
+    it('textSync should draw missing characters from a preloaded fallback font', () => {
+      figlet.parseFont('Standard', fontData);
+      figlet.parseFont('Big', big);
+
+      const output = figlet.textSync('Ω = 1', { font: 'Standard', fallbackFont: 'Big' });
+
+      expect(output).toEqual(readExpected('standardFallbackBig'));
+    });
+
+    it('textSync should throw when the fallback font is not loaded', () => {
+      figlet.parseFont('Standard', fontData);
+
+      expect(() =>
+        figlet.textSync('Ω', { font: 'Standard', fallbackFont: 'Big' }),
+      ).toThrow('Synchronous font loading is not implemented');
     });
   });
 });

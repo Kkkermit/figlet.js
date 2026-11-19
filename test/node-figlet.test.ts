@@ -327,6 +327,54 @@ describe('node-figlet', () => {
     });
   });
 
+  describe('fallback font', () => {
+    it('should draw missing characters from the fallback font', async () => {
+      const actual = await figlet.text("Ω = 1", {
+        font: "Standard",
+        fallbackFont: "Big",
+      });
+
+      const expected = readExpected('standardFallbackBig');
+      expect(actual).toBe(expected);
+    });
+
+    it('should draw missing characters from the fallback font synchronously', () => {
+      const actual = figlet.textSync("Ω = 1", {
+        font: "Standard",
+        fallbackFont: "Big",
+      });
+
+      const expected = readExpected('standardFallbackBig');
+      expect(actual).toBe(expected);
+    });
+
+    it('should draw characters the font leaves blank from the fallback font', () => {
+      const actual = figlet.textSync("ü", {
+        font: "ANSI Shadow",
+        fallbackFont: "Big",
+      });
+
+      expect(actual.trim()).not.toBe("");
+    });
+
+    it('should keep characters the fallback font draws with the main font hardblank', () => {
+      const actual = figlet.textSync("Ħ", {
+        font: "NScript",
+        fallbackFont: "Standard",
+      });
+
+      expect(actual).toContain("| |=| |");
+    });
+
+    it('should skip characters neither font has', () => {
+      const options = { font: "Standard", fallbackFont: "Bigfig" };
+      const actual = figlet.textSync("1☃\u0000", options);
+
+      const expected = figlet.textSync("1", options);
+      expect(actual).toBe(expected);
+    });
+  });
+
   describe('fontLoad', () => {
 
     beforeEach(() => {
