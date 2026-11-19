@@ -375,6 +375,38 @@ describe('node-figlet', () => {
     });
   });
 
+  describe('slant', () => {
+    it('should slant each line of the output', async () => {
+      const actual = await figlet.text("fig\nlet", {
+        font: "Standard",
+        slant: true,
+      });
+
+      const expected = readExpected('standardSlant');
+      expect(actual).toBe(expected);
+    });
+
+    it('should slant each line of the output synchronously', () => {
+      const actual = figlet.textSync("fig\nlet", {
+        font: "Standard",
+        slant: true,
+      });
+
+      const expected = readExpected('standardSlant');
+      expect(actual).toBe(expected);
+    });
+
+    it('should keep slanted text within the width', async () => {
+      const actual = await figlet.text("Hello From The Figlet Library", {
+        font: "Standard",
+        width: 40,
+        slant: true,
+      });
+
+      expect(getMaxWidth(actual)).toBeLessThanOrEqual(40);
+    });
+  });
+
   describe('fontLoad', () => {
 
     beforeEach(() => {
